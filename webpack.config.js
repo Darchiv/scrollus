@@ -2,7 +2,7 @@ var path = require('path')
 
 module.exports = function (env) {
   return {
-    entry: './src/index.js',
+    entry: path.resolve(__dirname, 'src', 'index.js'),
     output: {
       filename: 'scrollus.js',
       path: path.resolve(__dirname, 'lib'),
