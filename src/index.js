@@ -30,7 +30,7 @@ function getElementPosition (element) {
 }
 
 const scrollus = {
-  easing: easings,
+  ease: easings,
 
   /**
    * Scroll viewport to desired target which can be an element, a query or a
