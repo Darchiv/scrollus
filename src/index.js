@@ -47,7 +47,7 @@ const scrollus = {
    * @since 0.1.0
    */
   to: function (target, duration, options) {
-    const easing = options && options.easing || this.easing.linear
+    const easing = options && options.easing || this.ease.linear
 
     var point
     // Actual DOM element.
@@ -84,7 +84,7 @@ const scrollus = {
    * @since 0.2.0
    */
   toElement: function (target, duration, options) {
-    const easing = options && options.easing || this.easing.linear
+    const easing = options && options.easing || this.ease.linear
 
     if (!(target instanceof Element)) {
       throw new Error(`Scrollus: Target must be an instance of DOM Element. "${typeof target}" given.`)
@@ -111,7 +111,7 @@ const scrollus = {
    * @since 0.2.0
    */
   toVertical: function (position, duration, options) {
-    const easing = options && options.easing || this.easing.linear
+    const easing = options && options.easing || this.ease.linear
 
     if (typeof position !== 'number') {
       throw new Error('Scrollus: Position must be a number.')
@@ -132,7 +132,7 @@ const scrollus = {
    * @since 0.2.0
    */
   toHorizontal: function (position, duration, options) {
-    const easing = options && options.easing || this.easing.linear
+    const easing = options && options.easing || this.ease.linear
 
     if (typeof position !== 'number') {
       throw new Error('Scrollus: Position must be a number.')
