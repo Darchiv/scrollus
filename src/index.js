@@ -8,6 +8,15 @@
  * @property {number} y - Vertical component.
  */
 
+ /**
+ * Options for scrolling interface. Can be used with public API methods like
+ *   {@link to} method.
+ *
+ * @typedef {Object} Options
+ * @property {number} [easing=linear] - Easing function returning a value in
+ *   range [0, 1] given argument in range [0, 1].
+ */
+
 import easings from './easing'
 
 /* global Element */
@@ -28,25 +37,31 @@ const scrollus = {
    * point.
    *
    * @method to
-   * @param {(string|Element|Point)} target - Destination element or position
-   *   to scroll view to. Can be an actual Element, a query string or a Point,
-   *   eg. a {x: , y: } object.
+   * @param {(string|Element|Array|Point)} target - A destination element or
+   *   position to scroll view to. Can be an actual Element, a query string, a
+   *   Point, or array.
    * @param {number} duration - How much time in miliseconds scrolling will
    *   take.
-   * @param {object} options - Options.
+   * @param {Options} [options]
+   * @throws {Error}
    * @since 0.1.0
    */
   to: function (target, duration, options) {
-    options.easing = options.easing || this.easing.linear
-    const {easing} = options
+    const easing = options && options.easing || this.easing.linear
 
     var point
+    // Actual DOM element.
     if (target instanceof Element) {
       point = getElementPosition(target)
+    // CSS query.
     } else if (typeof target === 'string') {
       point = getElementPosition(getElementByQuery(target))
+    // Point object.
     } else if ('x' in target || 'y' in target) {
       point = target
+    // Array with minimum of 2 elements.
+    } else if (target instanceof Array && target.length >= 2) {
+      point = {x: target[0], y: target[1]}
     } else {
       throw new Error(`Scrollus: invalid target, "${target}" supplied.`)
     }
@@ -55,60 +70,75 @@ const scrollus = {
   },
 
   /**
-   * @ignore
    * Scroll browser window to given element's position. After scrolling, the
    * top-left corner of the element will be in the top-left corner of the
    * viewport, if possible. By default viewport will be scrolled in both axes.
+   * A more strict version of {@link to} method.
    *
    * @method toElement
-   * @param {(string|Element)} target - Destination element to scroll view to.
-   *   Can be an actual DOM Element or a query string.
+   * @param {Element} target - Destination element to scroll view to.
+   *   Must be an actual DOM Element.
    * @param {number} duration - Duration of scrolling animation in miliseconds.
-   * @param {object} options - Options. Currently useless.
-   * @throws {Error} Target must be an instance of DOM Element or a string
-   *   query selector which resolves to some element.
+   * @param {Options} [options]
+   * @throws {Error} Target must be an instance of DOM Element.
+   * @since 0.2.0
    */
   toElement: function (target, duration, options) {
-    let x, y
+    const easing = options && options.easing || this.easing.linear
 
-    // if (target instanceof Element) {
-    //   {x, y} = getElementPosition(target)
-    // }
-
-    if (!(target instanceof Element || typeof target === 'string')) {
-      throw new Error(`Target must be an instance of DOM Element or a string. "${typeof target}" given.`)
+    if (!(target instanceof Element)) {
+      throw new Error(`Scrollus: Target must be an instance of DOM Element. "${typeof target}" given.`)
     }
 
     if (typeof duration !== 'number' || duration < 0) {
-      throw new Error('Duration must be a non-negative number.')
+      throw new Error('Scrollus: Duration must be a non-negative number.')
     }
 
-    return
+    var {x, y} = getElementPosition(target)
+
+    beginScrolling(x, y, duration, easing)
   },
 
   /**
-   * @ignore
-   * Scroll to absolutely positioned point. After scrolling, the point will be
-   * in the top-left corner of the viewport, if possible. If only one point
-   * component is given then only that one axis will be scrolled.
+   * Scroll to absolutely positioned position in only y axis. For now it zeroes
+   * x axis.
    *
-   * @method toAbsolute
-   * @param {Point} point - A point to which scroll. Only one component is
-   *   required.
-   * @param {number} duration - Duration of scrolling in miliseconds.
-   * @param {object} options - Options. Currently useless.
-   * @throws {Error} Target point must have 'x' or 'y' property.
+   * @method toVertical
+   * @param {number} position - Amount of pixels from the top of container to
+   *   scroll view to.
+   * @param {number} duration - Duration of scrolling animation in miliseconds.
+   * @param {Options} [options]
+   * @since 0.2.0
    */
-  toAbsolute: function (point, duration, options) {
-    if (!('x' in point) && !('y' in point)) {
-      throw new Error('Point must have x or y or both properties.')
+  toVertical: function (position, duration, options) {
+    const easing = options && options.easing || this.easing.linear
+
+    if (typeof position !== 'number') {
+      throw new Error('Scrollus: Position must be a number.')
     }
 
-    if (typeof duration !== 'number' || duration < 0) {
-      throw new Error('Duration must be a non-negative number.')
+    beginScrolling(0, position, duration, easing)
+  },
+
+  /**
+   * Scroll to absolutely positioned position in only x axis. For now it zeroes
+   * y axis.
+   *
+   * @method toHorizontal
+   * @param {number} position - Amount of pixels from the left side of container
+   *   to scroll view to.
+   * @param {number} duration - Duration of scrolling animation in miliseconds.
+   * @param {Options} [options]
+   * @since 0.2.0
+   */
+  toHorizontal: function (position, duration, options) {
+    const easing = options && options.easing || this.easing.linear
+
+    if (typeof position !== 'number') {
+      throw new Error('Scrollus: Position must be a number.')
     }
 
-    return
+    beginScrolling(position, 0, duration, easing)
   },
 
   getElementPosition: getElementPosition
